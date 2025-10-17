@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtres Daltonisme - Module Unifié</title>
+    <link rel="stylesheet" href="colorblind-filters-unified.css">
+</head>
+<body>
+    <!-- Contenu de démonstration -->
+    <header>
+        <h1>Module Unifié des Filtres Daltonisme</h1>
+        <p>Testez les différents filtres pour améliorer la perception des couleurs</p>
+    </header>
+
+    <main>
+        <section class="demo-content">
+            <div class="color-test">
+                <h2>Test de couleurs</h2>
+                <div class="color-boxes">
+                    <div class="box red">Rouge</div>
+                    <div class="box green">Vert</div>
+                    <div class="box blue">Bleu</div>
+                    <div class="box yellow">Jaune</div>
+                    <div class="box orange">Orange</div>
+                    <div class="box violet">Violet</div>
+                </div>
+            </div>
+
+            <div class="text-demo">
+                <h3>Texte coloré</h3>
+                <p class="red-text">Ce texte est en rouge</p>
+                <p class="green-text">Ce texte est en vert</p>
+                <p class="blue-text">Ce texte est en bleu</p>
+                <p class="normal-text">Ce texte est en noir normal</p>
+            </div>
+
+            <div class="buttons-demo">
+                <h3>Boutons d'action</h3>
+                <button class="btn-success">Valider (Vert)</button>
+                <button class="btn-danger">Annuler (Rouge)</button>
+                <button class="btn-primary">Information (Bleu)</button>
+                <button class="btn-warning">Attention (Orange)</button>
+            </div>
+
+            <div class="status-indicators">
+                <h3>Indicateurs de statut</h3>
+                <div class="status success">✓ Succès</div>
+                <div class="status error">✗ Erreur</div>
+                <div class="status info">ℹ Information</div>
+                <div class="status warning">⚠ Attention</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button id="colorblind-toggle" class="colorblind-toggle" 
+            title="Ouvrir les filtres daltonisme" 
+            aria-label="Ouvrir les filtres daltonisme">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        </svg>
+    </button>
+
+    <!-- Sidebar avec tous les filtres -->
+    <aside id="colorblind-sidebar" class="colorblind-sidebar" role="complementary" aria-label="Panneau des filtres daltonisme">
+        <div class="sidebar-header">
+            <h2>Daltonisme</h2>
+            <button id="close-sidebar" class="close-btn" aria-label="Fermer">&times;</button>
+        </div>
+
+        <div class="sidebar-content">
+            <p class="sidebar-intro">* Cliquer sur les icônes/le nom/le fond pour dérouler les paramètres des filtres</p>
+
+            <!-- Liste des filtres -->
+            <div class="filters-list">
+                
+                <!-- Deutéranopie -->
+                <div class="filter-item" data-filter="deuteranopia">
+                    <div class="filter-header">
+                        <div class="filter-icon deuteranopia-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Deutéranopie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="deuteranopia">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Absence des cônes verts (M). Confusion rouge-vert.</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">80%</span></label>
+                            <input type="range" class="intensity-slider" min="0.3" max="1.0" step="0.1" value="0.8" data-filter-intensity="deuteranopia">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + D</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Deutéranomalie -->
+                <div class="filter-item" data-filter="deuteranomaly">
+                    <div class="filter-header">
+                        <div class="filter-icon deuteranomaly-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Deutéranomalie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="deuteranomaly">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Dysfonctionnement partiel des cônes verts. Décalage vers jaune-beige-orange.</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">60%</span></label>
+                            <input type="range" class="intensity-slider" min="0.2" max="1.0" step="0.1" value="0.6" data-filter-intensity="deuteranomaly">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + M</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Protanopie -->
+                <div class="filter-item" data-filter="protanopia">
+                    <div class="filter-header">
+                        <div class="filter-icon protanopia-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Protanopie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="protanopia">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Absence des cônes rouges (L). Confusion rouge-vert.</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">80%</span></label>
+                            <input type="range" class="intensity-slider" min="0.3" max="1.0" step="0.1" value="0.8" data-filter-intensity="protanopia">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + P</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Protanomalie -->
+                <div class="filter-item" data-filter="protanomaly">
+                    <div class="filter-header">
+                        <div class="filter-icon protanomaly-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Protanomalie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="protanomaly">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Dysfonctionnement partiel des cônes rouges. Rouges ternes et peu visibles.</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">70%</span></label>
+                            <input type="range" class="intensity-slider" min="0.2" max="1.0" step="0.1" value="0.7" data-filter-intensity="protanomaly">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + R</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Tritanopie -->
+                <div class="filter-item" data-filter="tritanopia">
+                    <div class="filter-header">
+                        <div class="filter-icon tritanopia-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Tritanopie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="tritanopia">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Absence des cônes bleus (S). Cécité bleu-jaune (très rare: ~0.01%).</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">85%</span></label>
+                            <input type="range" class="intensity-slider" min="0.3" max="1.0" step="0.1" value="0.85" data-filter-intensity="tritanopia">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + T</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Tritanomalie -->
+                <div class="filter-item" data-filter="tritanomaly">
+                    <div class="filter-header">
+                        <div class="filter-icon tritanomaly-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Tritanomalie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="tritanomaly">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Dysfonctionnement partiel des cônes bleus. Sensibilité réduite aux courtes longueurs d'onde.</p>
+                        <div class="filter-controls">
+                            <label>Intensité: <span class="intensity-value">60%</span></label>
+                            <input type="range" class="intensity-slider" min="0.2" max="1.0" step="0.1" value="0.6" data-filter-intensity="tritanomaly">
+                            <label>Niveau de sensibilité:</label>
+                            <select class="sensitivity-select" data-filter-sensitivity="tritanomaly">
+                                <option value="mild">Léger</option>
+                                <option value="moderate" selected>Modéré</option>
+                                <option value="severe">Sévère</option>
+                            </select>
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + Y</kbd></p>
+                    </div>
+                </div>
+
+                <!-- Achromatopsie -->
+                <div class="filter-item" data-filter="achromatopsia">
+                    <div class="filter-header">
+                        <div class="filter-icon achromatopsia-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="filter-name">Achromatopsie</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-filter-toggle="achromatopsia">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="filter-details">
+                        <p class="filter-description">Absence totale de fonctionnement des cônes. Vision en niveaux de gris uniquement.</p>
+                        <div class="filter-controls">
+                            <label>Confort lumineux: <span class="intensity-value">50%</span></label>
+                            <input type="range" class="intensity-slider" min="0.0" max="1.0" step="0.1" value="0.5" data-filter-intensity="achromatopsia">
+                            
+                            <label>Niveau de photophobie:</label>
+                            <select class="photophobia-select" data-filter-photophobia="achromatopsia">
+                                <option value="mild">Léger</option>
+                                <option value="moderate" selected>Modéré</option>
+                                <option value="severe">Sévère</option>
+                            </select>
+
+                            <label>Contraste: <span class="contrast-value">1.2</span></label>
+                            <input type="range" class="contrast-slider" min="1.0" max="1.8" step="0.05" value="1.2" data-filter-contrast="achromatopsia">
+
+                            <label>Luminosité: <span class="brightness-value">0.9</span></label>
+                            <input type="range" class="brightness-slider" min="0.6" max="1.2" step="0.05" value="0.9" data-filter-brightness="achromatopsia">
+
+                            <label>Taille du texte: <span class="text-scale-value">200%</span></label>
+                            <input type="range" class="text-scale-slider" min="1.0" max="2.5" step="0.1" value="2.0" data-filter-textscale="achromatopsia">
+                        </div>
+                        <p class="filter-shortcut">Raccourci: <kbd>Ctrl/Cmd + Shift + G</kbd></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay pour fermer la sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Couche d'atténuation pour achromatopsie -->
+    <div id="achro-dimmer" class="achro-dimmer"></div>
+
+    <script src="colorblind-filters-unified.js"></script>
+</body>
+</html>
