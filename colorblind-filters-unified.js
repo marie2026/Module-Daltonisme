@@ -126,135 +126,148 @@ class ColorblindFiltersUnified {
     }
     
     attachEvents() {
-    // Bouton principal toggle sidebar
-    if (this.toggleBtn) {
-        this.toggleBtn.addEventListener('click', () => this.toggleSidebar());
-    }
-    
-    // Fermeture sidebar
-    if (this.closeBtn) {
-        this.closeBtn.addEventListener('click', () => this.closeSidebar());
-    }
-    if (this.overlay) {
-        this.overlay.addEventListener('click', () => this.closeSidebar());
-    }
-    
-    // Événements pour chaque filtre
-    Object.keys(this.filters).forEach(filterName => {
-        const el = this.filterElements[filterName];
-        if (!el) return;
-        
-        // FIX FIREFOX: Clic sur le header pour expand/collapse
-        if (el.header) {
-            el.header.addEventListener('click', (e) => {
-                // Ne pas trigger si on clique sur le toggle switch ou ses enfants
-                if (e.target.closest('.toggle-switch')) {
-                    return; // Sortir complètement
-                }
-                this.toggleExpanded(filterName);
-            });
+        // Bouton principal toggle sidebar
+        if (this.toggleBtn) {
+            this.toggleBtn.addEventListener('click', () => this.toggleSidebar());
         }
         
-        // FIX FIREFOX: Toggle activation avec stopPropagation renforcé
-        if (el.toggle) {
-            // Change event
-            el.toggle.addEventListener('change', (e) => {
-                e.stopPropagation();
-                this.toggleFilter(filterName, e.target.checked);
-            });
+        // Fermeture sidebar
+        if (this.closeBtn) {
+            this.closeBtn.addEventListener('click', () => this.closeSidebar());
+        }
+        if (this.overlay) {
+            this.overlay.addEventListener('click', () => this.closeSidebar());
+        }
+        
+        // Événements pour chaque filtre
+        Object.keys(this.filters).forEach(filterName => {
+            const el = this.filterElements[filterName];
+            if (!el) return;
             
-            // Click event sur l'input
-            el.toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-            
-            // Click event sur le label parent
-            const toggleLabel = el.toggle.closest('.toggle-switch');
-            if (toggleLabel) {
-                toggleLabel.addEventListener('click', (e) => {
-                    e.stopPropagation();
+            // Clic sur le header pour expand/collapse
+            if (el.header) {
+                el.header.addEventListener('click', (e) => {
+                    // Ne pas trigger si on clique sur le toggle switch ou ses enfants
+                    if (e.target.closest('.toggle-switch')) {
+                        return;
+                    }
+                    this.toggleExpanded(filterName);
                 });
             }
-        }
-        
-        // Intensité
-        if (el.intensitySlider) {
-            el.intensitySlider.addEventListener('input', (e) => {
-                this.setFilterIntensity(filterName, parseFloat(e.target.value));
-            });
-        }
-        
-        // Sensibilité (tritanomaly)
-        if (el.sensitivitySelect) {
-            el.sensitivitySelect.addEventListener('change', (e) => {
-                this.filters[filterName].sensitivityLevel = e.target.value;
-                this.updateFilter(filterName);
-                this.saveSettings();
-            });
-        }
-        
-        // Photophobie (achromatopsia)
-        if (el.photophobiaSelect) {
-            el.photophobiaSelect.addEventListener('change', (e) => {
-                this.filters[filterName].photophobiaLevel = e.target.value;
-                this.updateFilter(filterName);
-                this.saveSettings();
-            });
-        }
-        
-        // Contraste (achromatopsia)
-        if (el.contrastSlider) {
-            el.contrastSlider.addEventListener('input', (e) => {
-                this.filters[filterName].contrast = parseFloat(e.target.value);
-                this.updateFilter(filterName);
-                this.updateContrastDisplay(filterName);
-                this.saveSettings();
-            });
-        }
-        
-        // Luminosité (achromatopsia)
-        if (el.brightnessSlider) {
-            el.brightnessSlider.addEventListener('input', (e) => {
-                this.filters[filterName].brightness = parseFloat(e.target.value);
-                this.updateFilter(filterName);
-                this.updateBrightnessDisplay(filterName);
-                this.saveSettings();
-            });
-        }
-        
-        // Taille du texte (achromatopsia)
-        if (el.textScaleSlider) {
-            el.textScaleSlider.addEventListener('input', (e) => {
-                this.filters[filterName].textScale = parseFloat(e.target.value);
-                this.updateFilter(filterName);
-                this.updateTextScaleDisplay(filterName);
-                this.saveSettings();
-            });
-        }
-    });
-    
-    // Raccourcis clavier
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-            Object.entries(this.filters).forEach(([name, config]) => {
-                if (e.key.toUpperCase() === config.shortcut) {
-                    e.preventDefault();
-                    const isActive = this.activeFilters.has(name);
-                    this.toggleFilter(name, !isActive);
+            
+            // Toggle activation
+            if (el.toggle) {
+                // Change event
+                el.toggle.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    this.toggleFilter(filterName, e.target.checked);
+                });
+                
+                // Click event sur l'input
+                el.toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+                
+                // Click event sur le label parent
+                const toggleLabel = el.toggle.closest('.toggle-switch');
+                if (toggleLabel) {
+                    toggleLabel.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
                 }
-            });
-        }
+            }
+            
+            // Intensité
+            if (el.intensitySlider) {
+                el.intensitySlider.addEventListener('input', (e) => {
+                    this.setFilterIntensity(filterName, parseFloat(e.target.value));
+                });
+            }
+            
+            // Sensibilité (tritanomaly)
+            if (el.sensitivitySelect) {
+                el.sensitivitySelect.addEventListener('change', (e) => {
+                    this.filters[filterName].sensitivityLevel = e.target.value;
+                    this.updateFilter(filterName);
+                    this.saveSettings();
+                });
+            }
+            
+            // Photophobie (achromatopsia)
+            if (el.photophobiaSelect) {
+                el.photophobiaSelect.addEventListener('change', (e) => {
+                    this.filters[filterName].photophobiaLevel = e.target.value;
+                    this.updateFilter(filterName);
+                    this.saveSettings();
+                });
+            }
+            
+            // Contraste (achromatopsia)
+            if (el.contrastSlider && filterName === 'achromatopsia') {
+                el.contrastSlider.addEventListener('input', (e) => {
+                    this.filters[filterName].contrast = parseFloat(e.target.value);
+                    this.updateFilter(filterName);
+                    this.updateContrastDisplay(filterName);
+                    if (this.activeFilters.has('achromatopsia') && this.isAchroObserverActive()) {
+                        this.scheduleAchromatopsiaContrastAudit();
+                    }
+                    this.saveSettings();
+                });
+            }
+
+            // Luminosité (achromatopsia)
+            if (el.brightnessSlider && filterName === 'achromatopsia') {
+                el.brightnessSlider.addEventListener('input', (e) => {
+                    this.filters[filterName].brightness = parseFloat(e.target.value);
+                    this.updateFilter(filterName);
+                    this.updateBrightnessDisplay(filterName);
+                    if (this.activeFilters.has('achromatopsia') && this.isAchroObserverActive()) {
+                        this.scheduleAchromatopsiaContrastAudit();
+                    }
+                    this.saveSettings();
+                });
+            }
+
+            // Intensité (pour achromatopsia = confort lumineux)
+            if (el.intensitySlider && filterName === 'achromatopsia') {
+                el.intensitySlider.addEventListener('input', (e) => {
+                    this.setFilterIntensity(filterName, parseFloat(e.target.value));
+                    if (this.activeFilters.has('achromatopsia') && this.isAchroObserverActive()) {
+                        this.scheduleAchromatopsiaContrastAudit();
+                    }
+                });
+            }
+            
+            // Taille du texte (achromatopsia)
+            if (el.textScaleSlider && filterName === 'achromatopsia') {
+                el.textScaleSlider.addEventListener('input', (e) => {
+                    this.filters[filterName].textScale = parseFloat(e.target.value);
+                    this.updateFilter(filterName);
+                    this.updateTextScaleDisplay(filterName);
+                    this.saveSettings();
+                });
+            }
+        });
         
-        // Échapper pour fermer sidebar
-        if (e.key === 'Escape') {
-            this.closeSidebar();
-        }
-    });
-}
+        // Raccourcis clavier
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                Object.entries(this.filters).forEach(([name, config]) => {
+                    if (e.key.toUpperCase() === config.shortcut) {
+                        e.preventDefault();
+                        const isActive = this.activeFilters.has(name);
+                        this.toggleFilter(name, !isActive);
+                    }
+                });
+            }
+            
+            // Échapper pour fermer sidebar
+            if (e.key === 'Escape') {
+                this.closeSidebar();
+            }
+        });
+    }
 
-
-
-    
     // === GESTION DE LA SIDEBAR ===
     
     toggleSidebar() {
@@ -308,26 +321,31 @@ class ColorblindFiltersUnified {
             if (filterName === 'achromatopsia') {
                 this.startAchromatopsiaObserver();
             }
-        } else {
-            this.activeFilters.delete(filterName);
             
-            // Arrêter l'observer pour achromatopsie
+            this.updateFilter(filterName);
+            this.updateFilterUI(filterName);
+            this.updateDisabledFilters();
+            this.saveSettings();
+            
+            this.announce(`Filtre ${filterName} activé`);
+            
+        } else {
+            // Arrêter l'observer AVANT de retirer du Set
             if (filterName === 'achromatopsia') {
                 this.stopAchromatopsiaObserver();
                 this.clearAchromatopsiaTextOverrides();
             }
+            
+            // ENSUITE retirer du Set
+            this.activeFilters.delete(filterName);
+            
+            this.updateFilter(filterName);
+            this.updateFilterUI(filterName);
+            this.updateDisabledFilters();
+            this.saveSettings();
+            
+            this.announce(`Filtre ${filterName} désactivé`);
         }
-        
-        this.updateFilter(filterName);
-        this.updateFilterUI(filterName);
-        this.updateDisabledFilters();
-        this.saveSettings();
-        
-        this.announce(
-            activate 
-                ? `Filtre ${filterName} activé` 
-                : `Filtre ${filterName} désactivé`
-        );
     }
     
     canActivateFilter(filterName) {
@@ -445,7 +463,9 @@ class ColorblindFiltersUnified {
             case 'achromatopsia':
                 styleEl.textContent = this.getAchromatopsiaStyles(filter);
                 this.applyAchromatopsiaDimming(filter);
-                this.scheduleAchromatopsiaContrastAudit();
+                if (this.activeFilters.has('achromatopsia') && this.isAchroObserverActive()) {
+                    setTimeout(() => this.scheduleAchromatopsiaContrastAudit(), 50);
+                }
                 break;
         }
     }
@@ -622,11 +642,17 @@ class ColorblindFiltersUnified {
             this.dimmer.style.opacity = '0';
         }
     }
+
+    // Helper: vérifier si l'observer Achromatopsie est bien actif
+    isAchroObserverActive() {
+        const obs = this.filters.achromatopsia?.mutationObserver;
+        return !!(obs && typeof obs.observe === 'function' && typeof obs.disconnect === 'function');
+    }
     
     // === ACHROMATOPSIA - GARDE DE CONTRASTE ===
     
     startAchromatopsiaObserver() {
-        if (this.filters.achromatopsia.mutationObserver) return;
+        if (this.isAchroObserverActive()) return;
         
         this.filters.achromatopsia.mutationObserver = new MutationObserver(() => {
             this.scheduleAchromatopsiaContrastAudit();
@@ -645,10 +671,16 @@ class ColorblindFiltersUnified {
     }
     
     stopAchromatopsiaObserver() {
-        if (this.filters.achromatopsia.mutationObserver) {
-            this.filters.achromatopsia.mutationObserver.disconnect();
-            this.filters.achromatopsia.mutationObserver = null;
+        // Annuler tout audit en attente
+        if (this._contrastAuditScheduled) {
+            this._contrastAuditScheduled = false;
         }
+        
+        const obs = this.filters.achromatopsia.mutationObserver;
+        if (obs && typeof obs.disconnect === 'function') {
+            try { obs.disconnect(); } catch(e) {}
+        }
+        this.filters.achromatopsia.mutationObserver = null;
         
         window.removeEventListener('resize', this.achromatopsiaResizeHandler);
         window.removeEventListener('scroll', this.achromatopsiaScrollHandler);
@@ -663,99 +695,148 @@ class ColorblindFiltersUnified {
     }
     
     scheduleAchromatopsiaContrastAudit() {
+        // Vérifier si le filtre est actif et si l'observer est bien actif
         if (!this.activeFilters.has('achromatopsia')) return;
+        if (!this.isAchroObserverActive()) return;
+        
         if (this._contrastAuditScheduled) return;
         
         this._contrastAuditScheduled = true;
         requestAnimationFrame(() => {
             this._contrastAuditScheduled = false;
+            // Double vérification avant l'exécution
+            if (!this.activeFilters.has('achromatopsia') || !this.isAchroObserverActive()) return;
             this.auditAchromatopsiaTextContrast();
         });
     }
     
     auditAchromatopsiaTextContrast() {
         const selectors = [
-            'p','span','a','li','label','small','em','strong',
-            'button','h1','h2','h3','h4','h5','h6',
-            '.status','.box'
+            'p','span','a','li','label','small','em','strong','code','pre',
+            'button','input[type="button"]','input[type="submit"]','textarea',
+            'h1','h2','h3','h4','h5','h6',
+            '.status','.nav-link','.box'
         ].join(',');
-        
+
         const nodes = document.body.querySelectorAll(selectors);
         
+        // Paramètres du filtre
+        const filter = this.filters.achromatopsia;
+        const { brightnessFactor } = this.getPhotophobiaSettings(filter.photophobiaLevel);
+        const effectiveBrightness = Math.max(0.6, Math.min(1.2, filter.brightness * brightnessFactor));
+        const effectiveContrast = filter.contrast;
+        
         nodes.forEach(el => {
-            // Ignorer la sidebar et ses enfants
             if (el.closest('#colorblind-sidebar') || el.closest('#colorblind-toggle')) {
                 return;
             }
             
             if (!this.isElementVisible(el)) return;
             if (!this.hasReadableText(el)) return;
-            
+
             const cs = getComputedStyle(el);
-            
+
             if (!el.dataset.achroTextOverride && !el.dataset.achroOrigColor) {
                 el.dataset.achroOrigColor = cs.color;
             }
-            
+
             const bgColor = this.getEffectiveBackgroundColor(el);
             if (!bgColor) return;
-            
+
             const bgRGB = this.parseRGB(bgColor);
             if (!bgRGB) return;
-            
+
+            // Simuler l'effet du filtre sur le fond
+            const adjustedBgRGB = this.applyFilterToColor(bgRGB, effectiveContrast, effectiveBrightness);
+            const Lbg = this.relativeLuminance(adjustedBgRGB);
+
             const fontSizePx = parseFloat(cs.fontSize) || 16;
             const fontWeight = parseInt(cs.fontWeight || '400', 10);
             const isBold = fontWeight >= 700;
             const isLarge = (fontSizePx >= 24) || (fontSizePx >= 18.66 && isBold);
             const target = isLarge ? 3.0 : 4.5;
+
+            // Tester noir vs blanc en tenant compte du filtre
+            const black = [0, 0, 0];
+            const white = [255, 255, 255];
             
-            const Lbg = this.relativeLuminance(bgRGB);
-            const curRGB = this.parseRGB(cs.color);
-            const curRatio = curRGB ? this.contrastRatio(this.relativeLuminance(curRGB), Lbg) : 0;
+            const adjustedBlack = this.applyFilterToColor(black, effectiveContrast, effectiveBrightness);
+            const adjustedWhite = this.applyFilterToColor(white, effectiveContrast, effectiveBrightness);
             
-            const black = [0,0,0];
-            const white = [255,255,255];
-            const blackRatio = this.contrastRatio(this.relativeLuminance(black), Lbg);
-            const whiteRatio = this.contrastRatio(this.relativeLuminance(white), Lbg);
+            const blackRatio = this.contrastRatio(this.relativeLuminance(adjustedBlack), Lbg);
+            const whiteRatio = this.contrastRatio(this.relativeLuminance(adjustedWhite), Lbg);
+            
+            // Si aucun des deux n'atteint le seuil, choisir le meilleur disponible
             const bestColor = blackRatio >= whiteRatio ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
-            
-            if (curRatio < target) {
-                if (cs.color !== bestColor) {
-                    el.style.color = bestColor;
-                }
+            const bestRatio = Math.max(blackRatio, whiteRatio);
+
+            // Vérifier le contraste actuel
+            const curRGB = this.parseRGB(cs.color);
+            const adjustedCurRGB = curRGB ? this.applyFilterToColor(curRGB, effectiveContrast, effectiveBrightness) : null;
+            const curRatio = adjustedCurRGB ? this.contrastRatio(this.relativeLuminance(adjustedCurRGB), Lbg) : 0;
+
+            if (curRatio < target && bestRatio >= target) {
+                // Appliquer la correction
+                el.style.setProperty('color', bestColor, 'important');
+                el.dataset.achroTextOverride = '1';
+            } else if (curRatio < target && bestRatio < target) {
+                // Même le meilleur choix ne suffit pas → ajouter un halo
+                el.style.setProperty('color', bestColor, 'important');
+                el.style.setProperty('text-shadow', '0 0 3px rgba(128,128,128,0.8)', 'important');
                 el.dataset.achroTextOverride = '1';
             } else {
+                // Contraste suffisant: tenter de restaurer
                 if (el.dataset.achroTextOverride === '1') {
                     const orig = el.dataset.achroOrigColor;
-                    let canRemove = false;
                     if (orig) {
                         const origRGB = this.parseRGB(orig);
                         if (origRGB) {
-                            const origRatio = this.contrastRatio(this.relativeLuminance(origRGB), Lbg);
+                            const adjustedOrigRGB = this.applyFilterToColor(origRGB, effectiveContrast, effectiveBrightness);
+                            const origRatio = this.contrastRatio(this.relativeLuminance(adjustedOrigRGB), Lbg);
                             if (origRatio >= target) {
-                                canRemove = true;
+                                el.style.removeProperty('color');
+                                el.style.removeProperty('text-shadow');
+                                delete el.dataset.achroTextOverride;
+                                delete el.dataset.achroOrigColor;
                             }
-                        }
-                    }
-                    if (canRemove) {
-                        el.style.color = '';
-                        delete el.dataset.achroTextOverride;
-                        delete el.dataset.achroOrigColor;
-                    } else {
-                        if (cs.color !== bestColor) {
-                            el.style.color = bestColor;
                         }
                     }
                 }
             }
         });
     }
+
+    // Simuler l'effet du filtre CSS sur une couleur
+    applyFilterToColor(rgb, contrast, brightness) {
+        let [r, g, b] = rgb;
+        
+        // Convertir en niveaux de gris (grayscale(1))
+        const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        
+        // Appliquer le contraste autour de 0.5
+        let adjusted = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
+        
+        // Appliquer la luminosité
+        adjusted = adjusted * brightness;
+        
+        // Clamp
+        adjusted = Math.max(0, Math.min(255, adjusted));
+        
+        return [adjusted, adjusted, adjusted];
+    }
     
     clearAchromatopsiaTextOverrides() {
+        // Nettoyer toutes les corrections
         const overridden = document.querySelectorAll('[data-achro-text-override="1"]');
         overridden.forEach(el => {
-            el.style.color = '';
+            el.style.removeProperty('color');
+            el.style.removeProperty('text-shadow');
             delete el.dataset.achroTextOverride;
+        });
+        
+        // Nettoyer aussi les couleurs originales mémorisées
+        const withOrigColors = document.querySelectorAll('[data-achro-orig-color]');
+        withOrigColors.forEach(el => {
             delete el.dataset.achroOrigColor;
         });
     }
@@ -913,9 +994,16 @@ class ColorblindFiltersUnified {
     // === SAUVEGARDE / CHARGEMENT ===
     
     saveSettings() {
+        // Ne pas sauvegarder les propriétés runtime (mutationObserver)
+        const sanitizedFilters = {};
+        Object.keys(this.filters).forEach(name => {
+            const { mutationObserver, ...rest } = this.filters[name];
+            sanitizedFilters[name] = { ...rest };
+        });
+
         const settings = {
             activeFilters: Array.from(this.activeFilters),
-            filters: this.filters,
+            filters: sanitizedFilters,
             timestamp: Date.now()
         };
         
@@ -931,6 +1019,11 @@ class ColorblindFiltersUnified {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 const settings = JSON.parse(saved);
+
+                // MIGRATION: retirer toute trace de mutationObserver éventuellement stockée
+                if (settings.filters?.achromatopsia && 'mutationObserver' in settings.filters.achromatopsia) {
+                    delete settings.filters.achromatopsia.mutationObserver;
+                }
                 
                 // Charger les filtres actifs
                 if (Array.isArray(settings.activeFilters)) {
@@ -945,9 +1038,14 @@ class ColorblindFiltersUnified {
                         }
                     });
                 }
+
+                // Assainir mutationObserver
+                this.filters.achromatopsia.mutationObserver = null;
             }
         } catch (error) {
             console.warn('Impossible de charger les paramètres:', error);
+            // En cas d'erreur, nettoyer le localStorage
+            localStorage.removeItem(this.storageKey);
         }
     }
     
@@ -979,7 +1077,11 @@ class ColorblindFiltersUnified {
     getState() {
         return {
             activeFilters: Array.from(this.activeFilters),
-            filters: JSON.parse(JSON.stringify(this.filters))
+            filters: JSON.parse(JSON.stringify(this.filters, (key, value) => {
+                // Ne jamais exposer/sérialiser l'observer
+                if (key === 'mutationObserver') return null;
+                return value;
+            }))
         };
     }
     
@@ -991,10 +1093,14 @@ class ColorblindFiltersUnified {
         if (state.filters) {
             Object.keys(state.filters).forEach(filterName => {
                 if (this.filters[filterName]) {
-                    Object.assign(this.filters[filterName], state.filters[filterName]);
+                    const { mutationObserver, ...rest } = state.filters[filterName];
+                    Object.assign(this.filters[filterName], rest);
                 }
             });
         }
+
+        // Toujours remettre l'observer achromatopsie à null avant d'éventuellement le redémarrer
+        this.filters.achromatopsia.mutationObserver = null;
         
         this.updateAllFilters();
         this.updateAllUI();
