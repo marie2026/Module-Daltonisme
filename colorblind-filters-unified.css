@@ -210,17 +210,27 @@ h1 {
     overscroll-behavior: contain;
 }
 
-.sidebar-intro {
-    font-size: 0.9rem;
-    color: #000000;
-    margin-bottom: 1.5rem;
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-left: 3px solid #667eea;
-    border-radius: 4px;
-    /* S'adapter au zoom du texte */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+/* Forcer les textes de la sidebar à noir pour lisibilité (RGAA/ARIA) */
+.colorblind-sidebar .sidebar-content,
+.colorblind-sidebar .sidebar-header h2,
+.colorblind-sidebar .filter-name,
+.colorblind-sidebar .filter-description,
+.colorblind-sidebar .filter-shortcut,
+.colorblind-sidebar .filter-controls label,
+.colorblind-sidebar .filter-controls select,
+.colorblind-sidebar .filter-controls input,
+.colorblind-sidebar .intensity-value,
+.colorblind-sidebar .contrast-value,
+.colorblind-sidebar .brightness-value,
+.colorblind-sidebar .text-scale-value,
+.colorblind-sidebar .status,
+.colorblind-sidebar .sidebar-intro {
+    color: #000000 !important;
+}
+
+/* Conserver les icônes leur style original (inverser si nécessaire via color) */
+.colorblind-sidebar .filter-icon {
+    color: white; /* garde la couleur d'icône prévue */
 }
 
 /* === LISTE DES FILTRES === */
@@ -264,6 +274,14 @@ h1 {
     /* S'adapter au contenu */
     min-height: min-content;
     flex-wrap: wrap; /* Permettre le retour à la ligne si nécessaire */
+}
+
+/* Rendre le header focusable visuellement et si un enfant est focusé (focus-within) */
+.filter-header:focus,
+.filter-header:focus-within {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+    border-radius: 6px;
 }
 
 .filter-icon {
@@ -331,12 +349,32 @@ h1 {
     flex-shrink: 0;
 }
 
+/* IMPORTANT: input garde une surface focusable pour clavier (opacity hidden mais taille présente) */
 .toggle-switch input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 52px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
     opacity: 0;
-    width: 0;
-    height: 0;
+    cursor: pointer;
+    z-index: 2; /* au-dessus du slider pour recevoir le focus/clic */
 }
 
+/* Focus visible sur la checkbox (visuel pour utilisateurs clavier) */
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: 0 0 0 4px rgba(102,126,234,0.25);
+    outline: none;
+}
+
+/* Si la checkbox est focusée mais non visible, afficher aussi un indicateur sur l'élément parent */
+.toggle-switch input:focus {
+    /* garde invisible mais accessible; style géré via + .toggle-slider */
+}
+
+/* Slider visuel */
 .toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -347,6 +385,7 @@ h1 {
     background-color: #ccc;
     transition: 0.3s;
     border-radius: 28px;
+    z-index: 1;
 }
 
 .toggle-slider:before {
@@ -383,7 +422,7 @@ h1 {
 }
 
 .filter-description {
-    color: #000000;
+    color: #666;
     font-size: 0.9rem;
     margin: 0 0 1rem 0;
     padding: 0.75rem;
@@ -403,7 +442,7 @@ h1 {
 .filter-controls label {
     font-weight: 500;
     font-size: 0.9rem;
-    color: #000000;
+    color: #495057;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -444,7 +483,7 @@ h1 {
 .filter-shortcut {
     margin-top: 0.75rem;
     font-size: 0.85rem;
-    color: #000000;
+    color: #6c757d;
     text-align: center;
     /* S'adapter au contenu */
     word-wrap: break-word;
