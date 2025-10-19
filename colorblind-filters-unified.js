@@ -1,6 +1,13 @@
 /**
  * Module Unifié des Filtres Daltonisme
  * Gestion centralisée de tous les filtres avec règles de compatibilité
+ *
+ * NOTE: accessibility (RGAA / ARIA / keyboard) additions:
+ * - Each filter header is keyboard-focusable (tabindex=0) and has role="button"
+ * - Enter/Space toggles expansion when header is focused
+ * - aria-expanded on headers and aria-hidden on details kept in sync
+ * - Toggle inputs receive an accessible aria-label
+ * - Keydown on toggles stops propagation so header handlers are not triggered
  */
 
 class ColorblindFiltersUnified {
@@ -105,9 +112,15 @@ class ColorblindFiltersUnified {
         Object.keys(this.filters).forEach(filterName => {
             const item = document.querySelector(`[data-filter="${filterName}"]`);
             if (item) {
+                const details = item.querySelector('.filter-details');
+                // Assigner un id aux détails si absent (nécessaire pour aria-controls)
+                if (details && !details.id) {
+                    details.id = `filter-details-${filterName}`;
+                }
                 this.filterElements[filterName] = {
                     item: item,
                     header: item.querySelector('.filter-header'),
+                    details: details,
                     toggle: item.querySelector(`[data-filter-toggle="${filterName}"]`),
                     intensitySlider: item.querySelector(`[data-filter-intensity="${filterName}"]`),
                     intensityValue: item.querySelector('.intensity-value'),
@@ -121,6 +134,70 @@ class ColorblindFiltersUnified {
                     textScaleSlider: item.querySelector(`[data-filter-textscale="${filterName}"]`),
                     textScaleValue: item.querySelector('.text-scale-value')
                 };
+
+                // --- Accessibility: make header keyboard-focusable and add ARIA attributes ---
+                const el = this.filterElements[filterName];
+                if (el.header) {
+                    // Only add attributes if not present to avoid touching other code
+                    if (!el.header.hasAttribute('tabindex')) {
+                        el.header.setAttribute('tabindex', '0');
+                    }
+                    if (!el.header.hasAttribute('role')) {
+                        el.header.setAttribute('role', 'button');
+                    }
+                    if (el.details) {
+                        el.header.setAttribute('aria-controls', el.details.id);
+                        const expanded = el.item.classList.contains('expanded') ? 'true' : 'false';
+                        el.header.setAttribute('aria-expanded', expanded);
+                        el.details.setAttribute('aria-hidden', expanded === 'true' ? 'false' : 'true');
+                    } else {
+                        el.header.setAttribute('aria-expanded', 'false');
+                    }
+
+                    // Keyboard support: Enter or Space toggles expansion
+                    // BUT ignore events that originate from interactive descendants (toggle, inputs...) — fix for "Space on toggle opens details"
+                    el.header.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            // If event started inside an interactive control, do nothing here
+                            const interactiveAncestor = (e.target && (e.target.closest && (e.target.closest('.toggle-switch') || e.target.closest('input,button,select,textarea,a'))));
+                            if (interactiveAncestor) {
+                                return;
+                            }
+                            e.preventDefault();
+                            this.toggleExpanded(filterName);
+                        }
+                    });
+                }
+
+                // Ensure toggles have accessible labels (keyboard users can focus them)
+                if (el.toggle) {
+                    const displayNameEl = item.querySelector('.filter-name');
+                    const displayName = displayNameEl ? displayNameEl.textContent.trim() : filterName;
+                    if (!el.toggle.hasAttribute('aria-label')) {
+                        el.toggle.setAttribute('aria-label', `Activer ${displayName}`);
+                    }
+
+                    // Important: stop propagation of keydown from the toggle so header's keydown isn't triggered.
+                    el.toggle.addEventListener('keydown', (ev) => {
+                        // For Space or Enter, prevent the key event from bubbling to header.
+                        if (ev.key === ' ' || ev.key === 'Spacebar' || ev.key === 'Enter') {
+                            ev.stopPropagation();
+                            // Let Space behave natively (toggle checkbox on Space).
+                            // For Enter, toggle manually for consistency across browsers:
+                            if (ev.key === 'Enter') {
+                                ev.preventDefault();
+                                try {
+                                    el.toggle.checked = !el.toggle.checked;
+                                    // trigger change event so existing handlers run
+                                    const changeEvent = new Event('change', { bubbles: true });
+                                    el.toggle.dispatchEvent(changeEvent);
+                                } catch (e) {
+                                    // ignore
+                                }
+                            }
+                        }
+                    });
+                }
             }
         });
     }
@@ -144,18 +221,18 @@ class ColorblindFiltersUnified {
             const el = this.filterElements[filterName];
             if (!el) return;
             
-            // Clic sur le header pour expand/collapse
+            // FIX FIREFOX: Clic sur le header pour expand/collapse
             if (el.header) {
                 el.header.addEventListener('click', (e) => {
                     // Ne pas trigger si on clique sur le toggle switch ou ses enfants
                     if (e.target.closest('.toggle-switch')) {
-                        return;
+                        return; // Sortir complètement
                     }
                     this.toggleExpanded(filterName);
                 });
             }
             
-            // Toggle activation
+            // FIX FIREFOX: Toggle activation avec stopPropagation renforcé
             if (el.toggle) {
                 // Change event
                 el.toggle.addEventListener('change', (e) => {
@@ -283,6 +360,9 @@ class ColorblindFiltersUnified {
         this.sidebar.classList.add('show');
         this.overlay.classList.add('show');
         document.body.style.overflow = 'hidden';
+        // Focus first interactive element for keyboard users
+        const firstToggle = this.sidebar.querySelector('input[type="checkbox"]');
+        if (firstToggle) firstToggle.focus();
     }
     
     closeSidebar() {
@@ -296,6 +376,23 @@ class ColorblindFiltersUnified {
         if (!el || !el.item) return;
         
         el.item.classList.toggle('expanded');
+
+        // Sync ARIA attributes
+        const expanded = el.item.classList.contains('expanded');
+        if (el.header) {
+            el.header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+        if (el.details) {
+            el.details.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+            // if expanded, move focus to first control inside details for keyboard-only users
+            if (expanded) {
+                const firstControl = el.details.querySelector('input, select, button, textarea, [tabindex]:not([tabindex="-1"])');
+                if (firstControl) {
+                    // small timeout to allow transition
+                    setTimeout(() => firstControl.focus(), 150);
+                }
+            }
+        }
     }
     
     // === GESTION DES FILTRES ===
@@ -931,6 +1028,13 @@ class ColorblindFiltersUnified {
             this.updateContrastDisplay(filterName);
             this.updateBrightnessDisplay(filterName);
             this.updateTextScaleDisplay(filterName);
+        }
+
+        // Ensure expanded state ARIA is synced if class changed elsewhere
+        if (el.header && el.details) {
+            const expanded = el.item.classList.contains('expanded') ? 'true' : 'false';
+            el.header.setAttribute('aria-expanded', expanded);
+            el.details.setAttribute('aria-hidden', expanded === 'true' ? 'false' : 'true');
         }
     }
     
