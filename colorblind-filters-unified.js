@@ -446,30 +446,33 @@ class ColorblindFiltersUnified {
     }
     
     canActivateFilter(filterName) {
-        const filter = this.filters[filterName];
+    const filter = this.filters[filterName];
+    
+    // Achromatopsie n'est compatible avec rien
+    if (filter.cone === 'ALL') {
+        return this.activeFilters.size === 0;
+    }
+    
+    // Si achromatopsie est actif, rien d'autre ne peut être activé
+    if (this.activeFilters.has('achromatopsia')) {
+        return false;
+    }
+    
+    // NOUVELLE LOGIQUE : Autoriser les filtres de cônes différents
+    // mais pas anopia + anomaly du même cône
+    for (const active of this.activeFilters) {
+        const activeFilter = this.filters[active];
         
-        // Achromatopsie n'est compatible avec rien
-        if (filter.cone === 'ALL') {
-            return this.activeFilters.size === 0;
-        }
-        
-        // Si achromatopsie est actif, rien d'autre ne peut être activé
-        if (this.activeFilters.has('achromatopsia')) {
+        // Même cône : on ne peut pas avoir anopia ET anomaly
+        if (activeFilter.cone === filter.cone) {
+            // Si même cône, vérifier si c'est le même type (interdit)
+            // ou des types différents (anopia vs anomaly - à interdire aussi)
             return false;
         }
-        
-        // Vérifier les conflits anopia/anomaly pour le même cône
-        for (const active of this.activeFilters) {
-            const activeFilter = this.filters[active];
-            
-            // Même cône : on ne peut pas avoir anopia ET anomaly
-            if (activeFilter.cone === filter.cone) {
-                return false;
-            }
-        }
-        
-        return true;
     }
+    
+    return true; // Différents cônes = OK
+}
     
     getConflicts(filterName) {
         const conflicts = [];
@@ -505,79 +508,141 @@ class ColorblindFiltersUnified {
         this.saveSettings();
     }
     
-    updateFilter(filterName) {
-        const isActive = this.activeFilters.has(filterName);
-        const body = document.body;
-        
-        if (isActive) {
-            body.classList.add(`filter-${filterName}-active`);
-            this.applyFilterStyle(filterName);
-        } else {
-            body.classList.remove(`filter-${filterName}-active`);
-            this.removeFilterStyle(filterName);
-        }
+    // Modifier la méthode updateFilter pour recalculer tous les filtres actifs
+updateFilter(filterName) {
+    const isActive = this.activeFilters.has(filterName);
+    const body = document.body;
+    
+    if (isActive) {
+        body.classList.add(`filter-${filterName}-active`);
+    } else {
+        body.classList.remove(`filter-${filterName}-active`);
     }
     
-    updateAllFilters() {
-        Object.keys(this.filters).forEach(filterName => {
-            this.updateFilter(filterName);
-        });
+    // Au lieu d'appliquer/retirer individuellement, recalculer tous les filtres actifs
+    this.applyComposedFilters();
+}
+
+// Nouvelle méthode pour composer tous les filtres actifs
+applyComposedFilters() {
+    const styleId = 'composed-filters-style';
+    let styleEl = document.getElementById(styleId);
+    
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
     }
     
-    applyFilterStyle(filterName) {
-        let styleId = `${filterName}-custom-style`;
-        let styleEl = document.getElementById(styleId);
-        
-        if (!styleEl) {
-            styleEl = document.createElement('style');
-            styleEl.id = styleId;
-            document.head.appendChild(styleEl);
-        }
-        
+    if (this.activeFilters.size === 0) {
+        styleEl.textContent = '';
+        return;
+    }
+    
+    // Accumuler les valeurs de filtres
+    let hueRotate = 0;
+    let saturate = 1;
+    let contrast = 1;
+    let sepia = 0;
+    let grayscale = 0;
+    let brightness = 1;
+    
+    // Parcourir tous les filtres actifs et accumuler leurs effets
+    this.activeFilters.forEach(filterName => {
         const filter = this.filters[filterName];
         const intensity = filter.intensity;
         
-        // Styles spécifiques selon le type de filtre
         switch(filterName) {
             case 'deuteranopia':
-                styleEl.textContent = this.getDeuteranopiaStyles(intensity);
+                hueRotate += 10 * intensity;
+                saturate *= (1 + (0.2 * intensity));
+                contrast *= (1 + (0.1 * intensity));
+                sepia += 0.1 * intensity;
                 break;
             case 'deuteranomaly':
-                styleEl.textContent = this.getDeuteranomalyStyles(intensity);
+                hueRotate += 8 * intensity;
+                saturate *= (1 + (0.15 * intensity));
+                contrast *= (1 + (0.08 * intensity));
+                sepia += 0.03 * intensity;
                 break;
             case 'protanopia':
-                styleEl.textContent = this.getProtanopiaStyles(intensity);
+                hueRotate += -5 * intensity;
+                saturate *= (1 + (0.3 * intensity));
+                contrast *= (1 + (0.15 * intensity));
+                sepia += 0.05 * intensity;
                 break;
             case 'protanomaly':
-                styleEl.textContent = this.getProtanomalyStyles(intensity);
+                hueRotate += -3 * intensity;
+                saturate *= (1 + (0.2 * intensity));
+                contrast *= (1 + (0.1 * intensity));
+                sepia += 0.02 * intensity;
                 break;
             case 'tritanopia':
-                styleEl.textContent = this.getTritanopiaStyles(intensity);
+                hueRotate += 25 * intensity;
+                saturate *= (1 + (0.25 * intensity));
+                contrast *= (1 + (0.15 * intensity));
+                sepia += 0.05 * intensity;
                 break;
             case 'tritanomaly':
-                styleEl.textContent = this.getTritanomalyStyles(intensity, filter.sensitivityLevel);
+                const multiplier = this.getSensitivityMultiplier(filter.sensitivityLevel);
+                hueRotate += 12 * intensity * multiplier;
+                saturate *= (1 + (0.15 * intensity * multiplier));
+                contrast *= (1 + (0.08 * intensity * multiplier));
+                sepia += 0.03 * intensity * multiplier;
                 break;
             case 'achromatopsia':
-                styleEl.textContent = this.getAchromatopsiaStyles(filter);
-                this.applyAchromatopsiaDimming(filter);
-                if (this.activeFilters.has('achromatopsia') && this.isAchroObserverActive()) {
-                    setTimeout(() => this.scheduleAchromatopsiaContrastAudit(), 50);
-                }
+                const { brightnessFactor } = this.getPhotophobiaSettings(filter.photophobiaLevel);
+                grayscale = 1; // Si achromatopsie actif, force grayscale
+                contrast *= filter.contrast;
+                brightness *= Math.max(0.6, Math.min(1.2, filter.brightness * brightnessFactor));
                 break;
         }
-    }
+    });
     
-    removeFilterStyle(filterName) {
-        const styleId = `${filterName}-custom-style`;
-        const styleEl = document.getElementById(styleId);
-        if (styleEl) {
-            styleEl.remove();
+    // Générer le CSS avec les valeurs combinées
+    const filterString = `
+        hue-rotate(${hueRotate}deg) 
+        saturate(${saturate}) 
+        contrast(${contrast}) 
+        sepia(${sepia}) 
+        grayscale(${grayscale}) 
+        brightness(${brightness})
+    `.trim();
+    
+    styleEl.textContent = `
+        body.has-active-filters header,
+        body.has-active-filters main,
+        body.has-active-filters .demo-content {
+            filter: ${filterString} !important;
         }
-        
-        if (filterName === 'achromatopsia') {
-            this.removeAchromatopsiaDimming();
+    `;
+    
+    // Ajouter/retirer la classe helper
+    document.body.classList.toggle('has-active-filters', this.activeFilters.size > 0);
+    
+    // Gérer l'achromatopsie dimming si actif
+    if (this.activeFilters.has('achromatopsia')) {
+        const filter = this.filters.achromatopsia;
+        this.applyAchromatopsiaDimming(filter);
+        if (this.isAchroObserverActive()) {
+            setTimeout(() => this.scheduleAchromatopsiaContrastAudit(), 50);
         }
+    } else {
+        this.removeAchromatopsiaDimming();
     }
+}
+
+// Modifier applyFilterStyle et removeFilterStyle pour utiliser la nouvelle méthode
+applyFilterStyle(filterName) {
+    // Cette méthode peut être simplifiée ou supprimée
+    // car applyComposedFilters() gère tout
+    this.applyComposedFilters();
+}
+
+removeFilterStyle(filterName) {
+    // Cette méthode peut être simplifiée
+    this.applyComposedFilters();
+}
     
     // === STYLES POUR CHAQUE FILTRE ===
     
@@ -595,6 +660,7 @@ class ColorblindFiltersUnified {
             }
         `;
     }
+    
     
     getDeuteranomalyStyles(intensity) {
         const hueRotate = 8 * intensity;
